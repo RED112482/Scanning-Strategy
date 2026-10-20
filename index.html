@@ -14,7 +14,7 @@ const common=[.5,.9,1.3,1.8,2.4,3.1,4,5.1,6.4,8,10,12.5,15.6,19.5];
 const fullVcp={"212":common,"12":common,"112":common,"215":[.5,.9,1.3,1.8,2.4,3.1,4,5.1,6.4,8,10,12.5,15.6,19.5],"31":[.5,1.5,2.5,3.5,4.5],"32":[.5,1.5,2.5,3.5,4.5],"34":[.5,1.5,2.5,3.5,4.5],"35":[.5,1.5,2.5,3.5,4.5,5.5,6.4],"11":common,"21":common,"121":common,"221":common};
 const documented={"212":[3.5,4.2],"12":[3.2,3.7],"112":[4.5,5.6],"215":[4.5,5.5]};
 const conf=k=>({v:$('v'+k).value,cut:$('a'+k).value,mode:$('s'+k).value,mpda:+$('m'+k).value});
-const anglesFor=p=>{let arr=fullVcp[p.v].filter(x=>p.cut==='none'||x<=+p.cut+.001);if($('base').value==='on')arr.unshift(.2);return arr};
+const anglesFor=p=>{if(observedCase(p)&&$('radar').value==='KMOB')return [...new Set(observed212S3.map(x=>x[0]))].sort((a,b)=>a-b);let arr=fullVcp[p.v].filter(x=>p.cut==='none'||x<=+p.cut+.001);if($('base').value==='on')arr.unshift(.2);return arr};
 const angles=()=>[...new Set([...anglesFor(conf('a')),...anglesFor(conf('b'))])].sort((a,b)=>a-b);
 const baseline=p=>{let a=anglesFor(p),last=a.at(-1);if(documented[p.v]&&last===6.4)return documented[p.v][$('base').value==='on'?1:0]*60;let ref=documented[p.v]?documented[p.v][$('base').value==='on'?1:0]*60:a.length*19,refNum=fullVcp[p.v].filter(x=>x<=6.4).length+($('base').value==='on'?1:0);return Math.max(100,ref*(.27+.73*a.length/refNum))};
 const heightFt=(e,nm)=>{let r=nm*6076.11549,R=3440.065*6076.11549*4/3,z=e*Math.PI/180;return Math.sqrt(r*r+R*R+2*r*R*Math.sin(z))-R};
@@ -27,7 +27,7 @@ const observed212S3=[
 [.2,0],[.4,60],[.8,101],[.2,141],[1.3,201],[1.8,241],
 [.2,255],[2.4,317],[3.1,330],[4,343],[5.2,358],[6.5,372],
 [.2,387],[8,449],[10.1,463],[12.5,476],[15.6,490],[19.5,504]];
-function observedCase(p){return p.v==='212'&&p.mode==='s3'&&p.cut==='none'&&p.mpda===0&&$('base').value==='on'}
+function observedCase(p){return $('radar').value==='KMOB'&&p.v==='212'&&p.mode==='s3'&&p.cut==='none'&&p.mpda===0&&$('base').value==='on'}
 function observedPlan(){// 540 s cycle is a provisional boundary estimate;
  // the next volume's 0.2° timestamp was NOT provided.
  const duration=540,events=observed212S3.map(([e,t],i)=>({e,start:Math.max(0,t-1),end:t,extra:e===.2&&i>0,observed:true}));
